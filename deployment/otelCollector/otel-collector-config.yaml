@@ -1,0 +1,96 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 1000
+  resourcedetection:
+    detectors: [ env, system ]
+  filter:
+    metrics:
+      include:
+        match_type: regexp
+        metric_names:
+          - ".*"
+
+exporters:
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: "observability"
+    send_timestamps: true
+    metric_expiration: 180m
+#    tls:
+#      insecure: true
+
+  elasticsearch:
+    endpoints: [ "http://elasticsearch:9200" ]
+    logs_index: "logs-"
+
+#    tls:
+#      insecure: true
+
+#  elasticsearch:
+#    endpoints: [ "http://elasticsearch:9200" ]
+#    logs_index: "logs-%{+YYYY.MM.dd}"
+#    mapping:
+#      mode: ecs
+#    timeout: 30s
+
+
+
+#  otlp/elastic:
+#    endpoint: "http://elasticsearch:9200"
+#    tls:
+#      insecure: true
+#    index: "logs-%{+YYYY.MM.dd}"
+#    mapping:
+#      mode: ecs
+#    retry_on_failure:
+#      enabled: true
+#      initial_interval: 5s
+#      max_interval: 30s
+#      max_elapsed_time: 300s
+
+  debug:
+    verbosity: detailed
+
+extensions:
+  health_check:
+#  basicauth:
+#    client_auth:
+#      username: elastic
+#      password: changeme
+
+service:
+  extensions: [ health_check ]
+  pipelines:
+    traces:
+      receivers: [ otlp ]
+      processors: [ memory_limiter, batch, resourcedetection ]
+      exporters: [ debug, otlp/jaeger ]
+    metrics:
+      receivers: [ otlp ]
+      processors: [ memory_limiter, batch, resourcedetection, filter ]
+      exporters: [ debug, prometheus ]
+    logs:
+      receivers: [ otlp ]
+      processors: [ memory_limiter, batch, resourcedetection ]
+      exporters: [ debug, elasticsearch ]
+
+  telemetry:
+    logs:
+      level: info

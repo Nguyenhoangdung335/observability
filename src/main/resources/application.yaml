@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: observability
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus, metrics
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+otel:
+  service:
+    name: observability-app
+  collector:
+    endpoint: http://localhost:4317/v1/metrics
