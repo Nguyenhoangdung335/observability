@@ -16,4 +16,8 @@ otel:
   service:
     name: observability-app
   collector:
-    endpoint: http://localhost:4317/v1/metrics
+    endpoint: http://localhost:4317
+
+logging:
+  level:
+    io.opentelemetry: DEBUG

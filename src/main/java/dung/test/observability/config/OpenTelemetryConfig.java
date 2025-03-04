@@ -1,5 +1,6 @@
 package dung.test.observability.config;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -25,9 +26,12 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 import java.time.Duration;
 
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @Configuration
 public class OpenTelemetryConfig {
 
@@ -65,12 +69,16 @@ public class OpenTelemetryConfig {
 
         // Build the OpenTelemetry instance
 
-        return OpenTelemetrySdk.builder()
+        OpenTelemetrySdk sdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
                 .setMeterProvider(meterProvider)
                 .setLoggerProvider(loggerProvider)
                 .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
                 .build();
+
+        GlobalOpenTelemetry.set(sdk);
+
+        return sdk;
     }
 
     private SpanProcessor createSpanProcessor() {

@@ -16,6 +16,8 @@
         <captureKeyValuePairs>true</captureKeyValuePairs>
         <captureCodeAttributes>true</captureCodeAttributes>
         <captureMarkerAttributes>true</captureMarkerAttributes>
+        <captureContextDataAttributes>true</captureContextDataAttributes>
+        <captureMdcAttributes>true</captureMdcAttributes>
     </appender>
 
     <root level="INFO">
