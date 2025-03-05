@@ -12,6 +12,7 @@ import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
@@ -23,9 +24,13 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
@@ -40,6 +45,18 @@ public class OpenTelemetryConfig {
 
     @Value("${otel.collector.endpoint}")
     private String otelCollectorEndpoint;
+
+//    @PostConstruct
+//    public void init() {
+////        OpenTelemetry sdk = openTelemetry();
+//        // Verify global registration
+//        try {
+//            OpenTelemetry global = GlobalOpenTelemetry.get();
+//            System.out.println("OpenTelemetry SDK successfully registered globally");
+//        } catch (Exception e) {
+//            System.err.println("Failed to register OpenTelemetry globally: " + e.getMessage());
+//        }
+//    }
 
     @Bean
     public OpenTelemetry openTelemetry() {
@@ -67,16 +84,14 @@ public class OpenTelemetryConfig {
                 .addLogRecordProcessor(createLogProcessor())
                 .build();
 
-        // Build the OpenTelemetry instance
-
-        OpenTelemetrySdk sdk = OpenTelemetrySdk.builder()
+        var sdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
                 .setMeterProvider(meterProvider)
                 .setLoggerProvider(loggerProvider)
                 .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
-                .build();
+                .buildAndRegisterGlobal();
 
-        GlobalOpenTelemetry.set(sdk);
+        OpenTelemetryAppender.install(sdk);
 
         return sdk;
     }

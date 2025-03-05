@@ -38,7 +38,14 @@ exporters:
 
   elasticsearch:
     endpoints: [ "http://elasticsearch:9200" ]
-    logs_index: "logs-"
+    logs_index: "logs-%{+YYYY.MM.dd}"
+    mapping:
+      mode: ecs
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
 
 #    tls:
 #      insecure: true

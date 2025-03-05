@@ -69,4 +69,22 @@ public class TestController {
                 "message", message
         );
     }
+
+    @GetMapping("/slf4j-only")
+    public Map<String, String> slf4jOnlyTest() {
+        // Test different logging levels
+        log.trace("TRACE log message - may not be visible depending on config");
+        log.debug("DEBUG log message - may not be visible depending on config");
+        log.info("INFO log message - should be visible");
+        log.warn("WARN log message - should be visible");
+        log.error("ERROR log message - should be visible");
+
+        try {
+            throw new RuntimeException("Test exception");
+        } catch (Exception e) {
+            log.error("Exception occurred", e);
+        }
+
+        return Map.of("status", "SLF4J logs emitted");
+    }
 }

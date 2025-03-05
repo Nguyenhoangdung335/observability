@@ -93,12 +93,12 @@
             <artifactId>opentelemetry-sdk-trace</artifactId>
             <version>1.32.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-logback-appender-1.0 -->
+
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-logback-appender-1.0</artifactId>
             <version>1.32.0-alpha</version>
-            <scope>runtime</scope>
+<!--            <scope>runtime</scope>-->
         </dependency>
 
         <!--        <dependency>-->
